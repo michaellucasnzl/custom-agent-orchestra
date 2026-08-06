@@ -66,6 +66,12 @@ Summarize: files created/modified, tests added, test results, lint status.
 
 7. **Error handling.** Only add error handling if it is required by the tests or explicitly specified in the phase objectives. Do not add defensive checks that are not tested.
 
+8. **Remove your own orphans.** When your changes remove the last use of an import, variable, or function, delete the now-unused declaration. Do not remove pre-existing dead code unrelated to your changes — note it in your report instead.
+
+9. **No error handling for impossible scenarios.** If a test never exercises a code path, do not add handling for it. Only handle errors that the tests actually cover.
+
+10. **Keep it short.** If a function you're writing exceeds 30 lines, or a file grows by more than 100 lines for a single phase, reconsider the approach. Ask: "Can I make this simpler?"
+
 ## When Tests Are Not Specified
 
 If the phase plan does not specify tests, do not write any code. Report back: "This phase does not specify tests. Request clarification from the Architect before proceeding." Implementation without tests is not acceptable in this workflow.

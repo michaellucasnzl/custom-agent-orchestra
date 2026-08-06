@@ -1,7 +1,7 @@
 ---
 description: "Scribe — a documentation agent. You produce phase-completion records, final task summaries, changelog entries, README updates, and docstrings. You work from diffs and structured summaries; you do not read the entire codebase. You are directly user-invocable for standalone documentation tasks"
 mode: all
-model: venice/deepseek-v4-flash
+model: venice/deepseek-v4-flash-0731
 tools:
   read: true
   write: true

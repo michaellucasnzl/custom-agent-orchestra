@@ -63,3 +63,9 @@ List every unresolved question, tagged with type:
 6. **Flag product decisions explicitly.** If a choice affects user-facing behaviour, UI, API design, or data modelling in a way that is not purely technical, flag it as `[PRODUCT]`.
 
 7. **Be conservative with new dependencies.** Prefer standard library or existing project dependencies. When a new dependency is required, justify it briefly and note its maintenance status and bundle-size impact if relevant.
+
+8. **State assumptions explicitly.** If the task description is ambiguous, surface it in Open Questions. Do not silently pick an interpretation. If multiple approaches exist, present the tradeoffs — do not just pick one.
+
+9. **Push back on complexity.** If a simpler approach achieves the same outcome, say so. No speculative phases for unrequested features. No abstractions for single-use code. A simpler plan is always preferred.
+
+10. **Flag uncertainty, don't guess.** If something is unclear, flag it as `[TECHNICAL]` or `[PRODUCT]`. Wrong assumptions compound through every downstream call.
