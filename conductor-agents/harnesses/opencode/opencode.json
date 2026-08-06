@@ -1,0 +1,12 @@
+{
+  "agents": {
+    "directory": ".opencode/agent"
+  },
+  "permissions": {
+    "default": {
+      "edit": "ask",
+      "bash": "ask",
+      "webfetch": "deny"
+    }
+  }
+}

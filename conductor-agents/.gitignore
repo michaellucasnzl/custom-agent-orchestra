@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.log
+
+# Plan files are task artifacts. Commit them if you want a record of what was done
+# and how. Ignore them if you treat them as local ephemera.
+# plans/

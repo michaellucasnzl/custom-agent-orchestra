@@ -1,0 +1,6 @@
+{
+  "chat.agentFilesLocations": {
+    ".github/agents": true
+  },
+  "chat.mcp.discovery.enabled": true
+}
