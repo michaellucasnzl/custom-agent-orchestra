@@ -65,6 +65,8 @@ Produce a single line following [Conventional Commits](https://www.conventionalc
 
 Where `type` is one of: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`.
 
+The Final Task Summary's `Changelog Entry` is the final aggregated entry for the whole task and the source of truth for the commit/changelog message. Per-phase commit messages suggested by the Conductor are advisory; if they disagree, this aggregated entry wins.
+
 ### Docstring Generation
 
 For a function, method, class, or module, produce a docstring in the project's existing docstring style. Include:
@@ -84,3 +86,4 @@ When asked to update a README, match the existing structure. Add new sections if
 2. **Consistent terminology.** Use the same terms the project uses. If the project calls them "services," do not call them "modules" or "providers."
 3. **No architectural commentary.** Do not evaluate the quality of the code you are documenting. Describe what it does, not whether it is well-designed.
 4. **Keep it short.** Phase records should be 10–30 lines. Task summaries should be 30–60 lines. Changelog entries are one line. Docstrings fit on one screen.
+5. **Dates are inputs, not inventions.** The Conductor must provide `Date`, `Started`, and `Completed` values. If any is missing from your inputs, ask the Conductor for it rather than filling in the current date or guessing.

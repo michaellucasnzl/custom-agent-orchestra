@@ -6,7 +6,7 @@
     "default": {
       "edit": "ask",
       "bash": "ask",
-      "webfetch": "deny"
+      "webfetch": "ask"
     }
   }
 }

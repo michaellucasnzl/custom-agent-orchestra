@@ -59,7 +59,7 @@ For each check, report issues only. Do not list items that pass.
 
 ## Verdicts
 
-You must return exactly one of these three tokens, followed by supporting detail:
+You must return exactly one of these three tokens. `NEEDS_REVISION` and `FAILED` are followed by supporting detail; `APPROVED` is not.
 
 ### APPROVED
 
@@ -98,6 +98,8 @@ FAILED
 ```
 
 ## Anti-Patterns to Watch For
+
+The checklist above governs the review; the anti-patterns below are concrete examples of what each check looks for. Do not flag a pattern that is not covered by a checklist item.
 
 - Tests that mock the implementation and test only that the mock was called.
 - Empty catch blocks: `catch (e) {}`.

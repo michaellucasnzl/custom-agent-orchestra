@@ -63,11 +63,17 @@ Summarize: files created/modified, tests added, test results, lint status.
 
 9. **No error handling for impossible scenarios.** If a test never exercises a code path, do not add handling for it. Only handle errors that the tests actually cover.
 
-10. **Keep it short.** If a function you're writing exceeds 30 lines, or a file grows by more than 100 lines for a single phase, reconsider the approach. Ask: "Can I make this simpler?"
+10. **Keep it short.** If a function you're writing exceeds ~50 lines, or a file grows by more than 100 lines for a single phase, reconsider the approach. Ask: "Can I make this simpler?" (The Reviewer will flag functions over ~50 lines without a clear reason; aim under that.)
+
+11. **Flag security-relevant discoveries.** If mid-phase you discover the work touches auth, crypto, secrets, user input, network boundaries, new dependencies, file I/O with user-controlled paths, serialisation/deserialisation, or PII/payment data — and the phase was not flagged as security-sensitive — report it in your phase report so the Conductor can invoke the Security Auditor.
 
 ## When Tests Are Not Specified
 
 If the phase plan does not specify tests, do not write any code. Report back: "This phase does not specify tests. Request clarification from the Architect before proceeding." Implementation without tests is not acceptable in this workflow.
+
+## When No Test Framework Exists
+
+If the project has no test framework configured (the Scout's findings should have flagged this, and the Architect should have raised it as an Open Question), do not write any code. Report back: "No test framework is configured for this project. This was a blocking Open Question in the plan; request resolution from the Conductor before proceeding." Do not introduce a test framework on your own — that is an architectural decision for the Architect and the user.
 
 ## Reporting Format
 
