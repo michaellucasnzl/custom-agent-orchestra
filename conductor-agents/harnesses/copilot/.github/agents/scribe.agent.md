@@ -5,7 +5,7 @@ tools:
   - edit
   - search/codebase
   - read/terminalLastCommand
-  - changes
+  - search/changes
 model: "Claude Haiku 4.5"
 user-invocable: true
 argument-hint: "[what to document]"

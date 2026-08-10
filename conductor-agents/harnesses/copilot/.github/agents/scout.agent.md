@@ -5,7 +5,7 @@ tools:
   - search/codebase
   - search/usages
   - read/terminalLastCommand
-  - problems
+  - read/problems
 model: "Claude Haiku 4.5"
 user-invocable: false
 ---

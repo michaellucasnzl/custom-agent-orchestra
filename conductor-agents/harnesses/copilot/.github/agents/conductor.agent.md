@@ -7,9 +7,9 @@ tools:
   - search/codebase
   - search/usages
   - read/terminalLastCommand
-  - runCommands
-  - problems
-  - testFailure
+  - execute/runInTerminal
+  - read/problems
+  - execute/testFailure
 agents:
   - scout
   - architect

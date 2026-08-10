@@ -5,8 +5,8 @@ tools:
   - search/codebase
   - search/usages
   - read/terminalLastCommand
-  - problems
-  - changes
+  - read/problems
+  - search/changes
   - web/fetch
 model: "Claude Opus 4.8"
 user-invocable: true

@@ -6,9 +6,9 @@ tools:
   - search/codebase
   - search/usages
   - read/terminalLastCommand
-  - runCommands
-  - problems
-  - testFailure
+  - execute/runInTerminal
+  - read/problems
+  - execute/testFailure
 model: "Claude Sonnet 4.6"
 user-invocable: true
 argument-hint: "[test file or error message]"

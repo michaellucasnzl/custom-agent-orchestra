@@ -6,8 +6,8 @@ tools:
   - search/codebase
   - search/usages
   - read/terminalLastCommand
-  - runCommands
-  - testFailure
+  - execute/runInTerminal
+  - execute/testFailure
 model: "Claude Haiku 4.5"
 user-invocable: false
 ---
