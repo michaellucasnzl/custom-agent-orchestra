@@ -6,7 +6,7 @@ tools:
   - read/problems
   - search/changes
   - search/codebase
-model: "Claude Sonnet 4.6"
+model: "Claude Opus 5"
 user-invocable: false
 ---
 

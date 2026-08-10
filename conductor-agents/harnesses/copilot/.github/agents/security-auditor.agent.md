@@ -8,7 +8,7 @@ tools:
   - read/problems
   - search/changes
   - web/fetch
-model: "Claude Opus 4.8"
+model: "Claude Opus 5"
 user-invocable: true
 argument-hint: "[optional: scope or focus area]"
 ---

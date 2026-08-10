@@ -18,7 +18,7 @@ agents:
   - security-auditor
   - debugger
   - scribe
-model: "Claude Sonnet 4.6"
+model: "Claude Opus 5"
 user-invocable: true
 argument-hint: "[task description]"
 handoffs:

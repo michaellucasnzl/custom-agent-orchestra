@@ -9,7 +9,7 @@ tools:
   - execute/runInTerminal
   - read/problems
   - execute/testFailure
-model: "Claude Sonnet 4.6"
+model: "Claude Opus 5"
 user-invocable: true
 argument-hint: "[test file or error message]"
 ---

@@ -8,7 +8,7 @@ tools:
   - read/terminalLastCommand
   - execute/runInTerminal
   - execute/testFailure
-model: "Claude Haiku 4.5"
+model: "Claude Sonnet 4.6"
 user-invocable: false
 ---
 

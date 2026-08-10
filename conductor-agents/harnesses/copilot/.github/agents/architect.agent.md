@@ -6,7 +6,7 @@ tools:
   - search/usages
   - read/terminalLastCommand
   - read/problems
-model: "Claude Opus 4.8"
+model: "Claude Opus 5"
 user-invocable: false
 ---
 
