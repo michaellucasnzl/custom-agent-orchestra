@@ -72,7 +72,7 @@ List every unresolved question, tagged with type:
 
 3. **Keep batches focused.** Prefer 1–5 closely related files per implementation invocation, but preserve cohesive changes instead of splitting mechanically.
 
-4. **Code first, tests second, execution last.** Plan all production code before test authoring. No test, lint, build, type-check, or end-to-end command may run until all planned code and tests are complete and the Reviewer has approved the whole change set.
+4. **Code first, tests second, execution last.** Plan all production code before test authoring. No test, lint, build, type-check, or end-to-end command may run until all planned code and tests are complete and the Reviewer has approved the whole change set. Test execution is deferred to a single end-of-task verification gate run by the Verifier agent.
 
 5. **Prefer existing conventions.** Unless the plan explicitly calls for introducing a new pattern, every batch should follow the patterns identified by the Scout.
 

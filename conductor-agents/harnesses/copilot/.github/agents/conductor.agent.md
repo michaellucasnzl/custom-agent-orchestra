@@ -14,6 +14,7 @@ agents:
   - scout
   - architect
   - implementer
+  - verifier
   - reviewer
   - security-auditor
   - debugger
@@ -69,13 +70,28 @@ For each Security Auditor finding, send the actionable remediation and relevant 
 
 ### 6. Final Validation
 
-Only after code and tests are complete and the whole-task review gates are approved, run the repository's complete validation matrix. Use commands discovered from repository configuration and instructions. Include all applicable unit tests, integration tests, lint, format checks, type checks, builds such as `dotnet build`, end-to-end tests, coverage gates, and other required CI-equivalent checks. Do not substitute a narrow test run for the complete suites.
+After the whole-task review gates are approved, invoke the **Verifier** to run the end-of-task gate. The Verifier runs commands non-interactively and reports structured, truncated results. Announce: "Invoking Verifier for the end-of-task gate."
 
-If validation fails, invoke the **Debugger** with the failing command and output. Send the proven root cause and minimal fix to the Implementer, then re-review the updated whole-task diff. Once approved, rerun the failed command and then the complete validation matrix so the final result reflects one coherent state.
+Specify the exact commands, adapting to the repository's toolchain. Examples:
+
+```bash
+dotnet build                           # Must introduce no new warnings relative to HEAD
+dotnet test --logger "console;verbosity=minimal"   # All tests must pass
+CI=true npm run lint                   # In the frontend directory
+CI=true npm run build -- --configuration production
+CI=true npm run e2e -- --reporter=line # Conditional — see E2E rule below
+```
+
+**Gate failure loop:**
+- On any failure, route the Verifier's truncated failure report to the **Debugger** for root-cause analysis.
+- If the Debugger's fix is ≤5 lines and already applied (`Applied: yes`), invoke the **Verifier** to re-run only the smallest failing subset (the single failing test file or project), never the whole gate.
+- If the fix is larger or only proposed (`Applied: no`), route it to the **Implementer** to apply, then invoke the **Verifier** for the same targeted re-run.
+- **Maximum 3 debug/fix cycles at the gate.** On the 4th failure, stop and escalate to the user with the full failure log.
+- Always note in the final report whether frontend build and E2E were run or skipped and why. Skip E2E for changes that do not touch UI, routes, or API contracts consumed by the frontend.
 
 ### 7. Completion
 
-After final validation passes, invoke the **Scribe** only when a durable task record or changelog entry is required. Otherwise compose the concise final summary directly.
+After final validation passes, invoke the **Scribe** only when a durable task record or changelog entry is required. Always supply the started/completed dates in the invocation — the Scribe must never guess dates. Otherwise compose the concise final summary directly.
 
 Present one final summary containing the behavior delivered, files changed, Reviewer and Security Auditor outcomes, every validation command and result, and any open follow-ups. Do not provide routine per-batch summaries or ask for intermediate commits.
 
@@ -111,6 +127,7 @@ Present one final summary containing the behavior delivered, files changed, Revi
 | Scout | When discovery is needed after intake | Discovers relevant files, patterns, test setup, risks | Haiku |
 | Architect | For non-trivial tasks after discovery | Produces an ordered code-first implementation plan | Opus |
 | Implementer | Production-code batches, then test batches, then approved revisions | Code-first implementation without running validation | Sonnet |
+| Verifier | End-of-task gate, and targeted re-runs after fixes | Runs build/test/lint/E2E commands non-interactively, reports truncated structured results | Haiku |
 | Reviewer | After the whole task is code- and test-complete | Static quality gate on the complete uncommitted diff | Opus |
 | Security Auditor | Conditionally, before final validation | Adversarial security review of the complete change | Opus |
 | Debugger | On final validation or runtime failure | Root-cause analysis of failures | Opus |

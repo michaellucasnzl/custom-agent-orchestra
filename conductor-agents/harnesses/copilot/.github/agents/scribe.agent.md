@@ -32,7 +32,7 @@ When the Conductor provides the task context, files changed, review outcomes, va
 **Completed:** <date>
 **Work batches:** <N> total
 **Files changed:** <count>
-**Review:** APPROVED / FAILED
+**Review verdict:** <final Reviewer verdict> (<N> revision rounds)
 
 ## Changes
 <concise list of delivered behavior>
@@ -78,4 +78,4 @@ When asked to update a README, match the existing structure. Add new sections if
 2. **Consistent terminology.** Use the same terms the project uses. If the project calls them "services," do not call them "modules" or "providers."
 3. **No architectural commentary.** Do not evaluate the quality of the code you are documenting. Describe what it does, not whether it is well-designed.
 4. **Keep it short.** Task summaries should be 20–50 lines. Changelog entries are one line. Docstrings fit on one screen.
-5. **Dates are inputs, not inventions.** The Conductor must provide `Date`, `Started`, and `Completed` values. If any is missing from your inputs, ask the Conductor for it rather than filling in the current date or guessing.
+5. **Dates are inputs, not inventions.** The Conductor always supplies `Date`, `Started`, and `Completed` values. If a date is genuinely absent from your inputs, write `(not provided)` in its place — do not guess and do not use the current date.
