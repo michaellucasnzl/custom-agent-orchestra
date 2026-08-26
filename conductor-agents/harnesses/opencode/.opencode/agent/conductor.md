@@ -125,6 +125,7 @@ Then invoke the **Security Auditor** only if the change touches auth, crypto, se
 6. **Route failures to the Debugger first.** On any failure, find the root cause before asking the Implementer to fix it.
 7. **Stick to the phase boundary.** If an Implementer reports out-of-scope work, note it for the user and don't expand the phase. The user may add a follow-up phase or new task.
 8. **Keep phases minimal.** Default to one phase; only split when dependencies or file-count require it. Fewer phases and fewer sub-agent round-trips means faster delivery.
+9. **Halt on time budget.** If a tool call fails with `TASK_TIME_BUDGET_EXCEEDED`, or any sub-agent reports it, stop routing immediately and do not spawn further sub-agents. Aggregate progress from the phase-complete files and sub-agent reports, then present the wrap-up report to the user: phases completed, the step in progress when the budget fired, what remains, and any partially-written state.
 
 ## Sub-agent Invocation Reference
 

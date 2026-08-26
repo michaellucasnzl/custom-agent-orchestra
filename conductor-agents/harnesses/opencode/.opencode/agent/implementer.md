@@ -45,6 +45,16 @@ Summarize: files created/modified and tests added. State that all test execution
 
 > Do not run `dotnet build`, `dotnet test`, `npm run lint` beyond the changed files, or any E2E. The Verifier runs the single end-of-task verification gate after all phases are complete. You will never be asked to run the gate.
 
+## Command Execution Rules
+
+These apply to every shell command you run, including lint/format in Step 3:
+
+1. **Non-interactive, always.** Set `CI=true` for frontend commands. Never start anything in watch mode (`ng serve`, `ng build --watch`, `dotnet watch`, `npm start`, test watchers).
+2. **Never background long-running servers** (`ng serve`, `dotnet run`, Playwright's webServer). They outlive the phase, become orphaned processes, and hang later sessions. Playwright starts and owns its own servers for E2E — never pre-start them.
+3. **Timeouts:** if a command produces no output for 10 minutes, kill it and report it as `TIMED_OUT` with the last ~20 lines of output. Do not retry a timed-out command — report it to the Conductor.
+4. **Clean up.** Kill every process you started before reporting phase completion.
+5. **Time budget:** if any tool call fails with `TASK_TIME_BUDGET_EXCEEDED`, stop immediately — do not attempt further tool calls — and make that the headline of your phase report.
+
 ## Hard Constraints
 
 1. **Stay inside the phase boundary.** If you discover work that is necessary but outside the current phase scope, do not do it. Instead, report it clearly: "Discovered out-of-scope work: <description> in <file>. This should be added to a later phase or a new task."
