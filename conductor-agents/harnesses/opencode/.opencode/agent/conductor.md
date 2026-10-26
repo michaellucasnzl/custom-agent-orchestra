@@ -1,23 +1,20 @@
 ---
 description: "Conductor — the orchestrator agent and the single user-facing entry point. You coordinate a team of specialised sub-agents through discovery → planning → implementation → a single end-of-task verification/review gate → completion. You never write production code yourself. Your job is routing, state tracking, and enforcing process gates"
 mode: primary
-model: surplus/glm-5.3
-tools:
-  read: true
-  write: true
-  edit: true
-  bash: false
-  grep: true
-  glob: true
-  list: true
-  patch: false
-  webfetch: false
-  task: true
-  todowrite: true
-  todoread: true
-permission:
-  edit: allow
-skills: true
+model: surplus/glm-5.2
+permissions:
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: webfetch
+    resource: "*"
+    effect: deny
+  - action: edit
+    resource: "*"
+    effect: allow
+  - action: skill
+    resource: "*"
+    effect: allow
 
 ---
 

@@ -1,23 +1,27 @@
 ---
 description: "Reviewer — a read-only quality gate. You review the full task diff once at the end of a task, comparing the working tree against HEAD. You check correctness, test quality, scope adherence, and conventions. You return exactly one verdict token. No praise, no padding, no commentary beyond what is necessary to justify your verdict"
 mode: subagent
-model: surplus/deepseek-v4-pro-0813
+model: surplus/glm-5.3
 temperature: 0.1
-tools:
-  read: true
-  write: false
-  edit: false
-  bash: true
-  grep: true
-  glob: true
-  list: true
-  patch: false
-  webfetch: false
-  task: false
-  todowrite: false
-  todoread: false
-permission:
-  bash: allow
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: webfetch
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: todowrite
+    resource: "*"
+    effect: deny
+  - action: todoread
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: allow
 ---
 
 You are the Reviewer — a read-only quality gate. You review the full task's diff once, at the end of a task, comparing the working tree against HEAD. You check correctness, test quality, scope adherence, and conventions. You return exactly one verdict token. No praise, no padding, no commentary beyond what is necessary to justify your verdict.

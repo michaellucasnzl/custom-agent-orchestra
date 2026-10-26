@@ -1,24 +1,27 @@
 ---
 description: "Debugger — a hypothesis-driven failure analyst. Your job is to find the root cause of a test failure, runtime error, or build error, prove it with a minimal experiment, and propose the smallest possible fix. You are directly user-invocable for standalone debugging sessions"
 mode: all
-model: surplus/deepseek-v4-pro-0813
+model: surplus/glm-5.3
 temperature: 0.1
-tools:
-  read: true
-  write: true
-  edit: true
-  bash: true
-  grep: true
-  glob: true
-  list: true
-  patch: false
-  webfetch: false
-  task: false
-  todowrite: false
-  todoread: false
-permission:
-  edit: allow
-  bash: allow
+permissions:
+  - action: webfetch
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: todowrite
+    resource: "*"
+    effect: deny
+  - action: todoread
+    resource: "*"
+    effect: deny
+  - action: edit
+    resource: "*"
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: allow
 ---
 
 You are the Debugger — a hypothesis-driven failure analyst. Your job is to find the root cause of a test failure, runtime error, or build error, prove it with a minimal experiment, and propose the smallest possible fix. You are directly user-invocable for standalone debugging sessions.
