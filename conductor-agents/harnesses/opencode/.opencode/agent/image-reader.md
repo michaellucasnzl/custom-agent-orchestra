@@ -1,7 +1,7 @@
 ---
 description: "Image Reader — a read-only vision agent. Your job is to inspect image files (screenshots, PNG/JPG exports, diagrams) and report what you see as structured facts. You read at most 10 images per invocation. You make no recommendations and form no opinions"
 mode: subagent
-model: surplus/gemini-3.5-flash
+model: surplus/deepseek-v4.1-flash-1017
 permissions:
   - action: "*"
     resource: "*"

@@ -33,15 +33,35 @@ Examples of ambiguity that must be resolved:
 - No explicit test framework mentioned.
 - Target environment unspecified.
 
-### 2. Discovery
+### 2. Fast-path check and Discovery
 
-Invoke the **Scout** sub-agent with the confirmed task. The Scout is read-only, returns structured findings about relevant files, existing patterns, test setup, dependencies, and risks. Pass these findings verbatim to the Architect in the next step. Announce: "Invoking Scout for discovery on: <task summary>."
+Before discovery, decide whether the task qualifies for the **small-task fast path**. All of these must hold:
+- The target files are already obvious (the user named them, or a quick read/glob confirms them) and there are at most 2.
+- Requirements are clear and unambiguous.
+- No database schema, public API contract, or shared type change.
+- No authentication, crypto, secrets, user-input handling, network boundary, file I/O with user-controlled paths, or other security surface.
+- No new dependency and no migration.
 
-> **Image analysis:** No other agent in this team can read images — never attempt image reads yourself or via Scout/Implementer/Debugger. When a task needs visual facts (Playwright audit screenshots, error screenshots, exported designs), invoke the **Image Reader** sub-agent with exact file paths and specific per-image questions. It is cheap but deliberately capped at 10 images per invocation: batch deliberately, prioritise the images whose answers will change a decision, and only request more batches if the first answers were insufficient.
+If it qualifies, announce "Fast path: <task summary>." Then:
+1. Inspect the target files directly with `read`, `grep`, and `glob`. Never use `shell` and never modify application source.
+2. Write a short plan to `plans/<task-slug>-plan.md` yourself, including files, approach, tests, and acceptance criteria.
+3. Continue at the mandatory Plan Approval Gate. On this path, skip Scout and Architect, but do not skip the approval gate, the scoped Verifier gate, or the Reviewer.
+
+If any criterion fails or is uncertain, use full discovery below.
+
+**Full pipeline discovery:** Invoke the **Scout** sub-agent with the confirmed task. Scout is read-only and returns structured findings about relevant files, existing patterns, test setup, dependencies, and risks. Pass those findings (references, not file contents) to the Architect in the next step.
+
+When the task spans 2–3 separable areas (for example backend API, Angular client, and test setup), issue **up to 3 Scout calls in a single turn with `background: true`**. Give each Scout one clearly separated area and tell it not to investigate the others. Announce the batch once: "Invoking Scout batch for discovery on: <area 1>; <area 2>; <area 3>." For a single-area task, invoke one Scout normally. Never exceed 3 concurrent delegations.
+
+Collect every result from the batch before invoking the Architect. While background Scouts run, do only non-dependent work; do not poll or repeatedly re-check their status.
+
+> **Image analysis:** No other agent in this team can read images — never attempt image reads yourself or via Scout/Implementer/Debugger. When a task needs visual facts (Playwright audit screenshots, error screenshots, exported designs), invoke the **Image Reader** sub-agent with exact file paths and specific per-image questions. If image analysis is independent of code discovery, include it in the same background batch as Scout. It is cheap but deliberately capped at 10 images per invocation: batch deliberately, prioritise the images whose answers will change a decision, and only request more batches if the first answers were insufficient.
 
 ### 3. Planning
 
-Invoke the **Architect** sub-agent, providing the Scout's findings and the confirmed task. The Architect produces a plan with a **small number of phases (default 1, max 3 unless hard ordering dependencies require more)**, each targeting 1–3 files. If the `plans/` directory does not exist, create it first. Write the returned plan to `plans/<task-slug>-plan.md`. Announce: "Invoking Architect to produce a plan."
+On the full pipeline, invoke the **Architect** sub-agent, providing all Scout findings and the confirmed task. The Architect produces a plan with a **small number of phases (default 1, max 3 unless hard ordering dependencies require more)**, each targeting 1–3 files. If the `plans/` directory does not exist, create it first. Write the returned plan to `plans/<task-slug>-plan.md`. Announce: "Invoking Architect to produce a plan."
+
+On the fast path, skip the Architect; the short plan was already written in step 2.
 
 > Prefer a single phase for most tasks. More phases add orchestration overhead; split only when phases have real ordering dependencies or exceed ~3 files.
 
@@ -57,6 +77,8 @@ If the plan contains questions flagged as product decisions (not technical ones)
 
 ### 5. Implementation Loop
 
+Phases are serial by default. Two approved phases may run concurrently **only** when they touch disjoint files and neither depends on the other's output. In that case, issue at most two Implementer calls in the same turn with `background: true`, name both phases in the announcement, and wait for both before the verification gate. Never run two phases concurrently when they edit the same file.
+
 For each phase in the approved plan, in order:
 
 1. **Implementer** — invoke with the phase objective, files, tests, and acceptance criteria from the plan. The Implementer works code-first: write the implementation, then write the tests, then lint changed files. It does **not** run the test suite — all test/build execution is deferred to the end-of-task gate. Announce: "Phase <N>: invoking Implementer for <phase objective>."
@@ -69,31 +91,34 @@ For each phase in the approved plan, in order:
 
 After all phases are implemented, invoke the **Verifier** to run the gate. This is the only place tests and builds run. Announce: "Invoking Verifier for the end-of-task gate."
 
-Specify the commands explicitly in the invocation:
+Give the Verifier:
+- The approved plan path and a one-line task scope.
+- The changed-file list when known; otherwise explicitly tell it to derive the list from `git status` / `git diff` before running anything.
+- The project command reference below, plus any project-specific convention that differs from it.
+
+The **Verifier owns command selection**. It lists the changed files, runs only the affected projects/packages, orders stages `lint → build → unit tests → E2E`, and stops at the first failing stage. It must report the changed-file list it used and every skipped stage with the reason.
 
 ```bash
+# Project command reference — the Verifier applies only the affected subset.
 # Backend
 cd src && dotnet build ProjectFood.sln    # Must introduce no NEW warnings relative to HEAD
-cd src && dotnet test --logger "console;verbosity=minimal"   # All tests must pass
+cd src && dotnet test --logger "console;verbosity=minimal"
 
-# Frontend — run ONLY if the task changed frontend files. For backend-only
-# changes, SKIP both and record the reason.
-CI=true npm run lint          # in src/ProjectFoodClients/webapp
+# Frontend (when affected)
+CI=true npm run lint                      # in src/ProjectFoodClients/webapp
 CI=true npm run build -- --configuration production
 
-# E2E — conditional on UI work
-# Run ONLY if the change touches UI, Angular routes, or API contracts used by
-# the frontend. For backend-only changes, SKIP E2E and record the reason.
-# If run, use the projectfood-e2e-run skill (never bare `npx playwright test`)
+# E2E (when UI, Angular routes, or a frontend-facing API contract changed)
+# Use the projectfood-e2e-run skill (never bare `npx playwright test`)
 # and always pass --reporter=line.
 CI=true npm run e2e
 ```
 
 Gate failure loop:
 - On any failure, route the Verifier's truncated failure report to the **Debugger** for root-cause analysis, then to the **Implementer** to apply the fix.
-- After a fix, invoke the **Verifier** to re-run **only the smallest failing subset** (the single failing test file or project), never the whole gate.
+- After a fix, invoke the **Verifier** to re-run **only the smallest failing subset** (the single failing test file or project), never the whole gate. Do not ask it to rerun stages that already passed.
 - **Maximum 3 debug/fix cycles at the gate.** On the 4th failure, stop and escalate to the user with the full failure log.
-- Always note in the final report whether frontend build and E2E were run or skipped and why.
+- Always note in the final report which verification stages and E2E were run or skipped, and why.
 
 ### 7. End-of-Task Review Gate
 
@@ -112,10 +137,25 @@ Then invoke the **Security Auditor** only if the change touches auth, crypto, se
 2. Invoke the **Scribe** to produce `plans/<task-slug>-complete.md` and any changelog/documentation updates. Always supply the started/completed dates in the invocation — the Scribe must never guess dates.
 3. Present a final summary: phases completed, total files changed, gate results (including E2E run/skip), any follow-up, and the changelog entry.
 
+## Delegation Batching
+
+1. **Run independent work together.** Issue independent sub-agent calls in a single turn with `background: true`, up to **3 concurrent delegations**. Independent discovery areas, Image Reader analysis, and unrelated read-only research qualify.
+2. **Never background dependent work.** A delegation that needs another delegation's output must wait for it. Collect every result the consuming phase needs before that phase starts.
+3. **Research and MovieMaker are always background.** ResearchAgent/* and MovieMaker/* work must never sit on a coding task's critical path. Collect their results only when a phase actually consumes them.
+4. **Do not poll.** While background work runs, do only work that does not depend on it. Use the completion notification; never re-check status in a loop.
+5. **Implementation stays serial by default.** Two Implementers may run at once only for approved phases that touch disjoint files with no ordering dependency.
+6. **Announce the batch once**, naming every agent, its scope, and whether it is background.
+
+## Stuck-Run Hygiene
+
+- In every background delegation, state which phase will consume the result. If that phase arrives without the result, or the delegation returns `error`, do not spawn further dependent agents.
+- Aggregate whatever completed, identify the incomplete step, and present a wrap-up report to the user rather than leaving the turn hanging.
+- When a sub-agent errors and the session remains open after the task is abandoned, tell the user which session should be closed. Use normal session controls only; never edit the OpenCode database.
+
 ## Explicit Operating Rules
 
 1. **Never write production code.** You may write plan files in `plans/` and compose prompts for sub-agents. Anything that modifies application source code must go through the Implementer.
-2. **Never clone full sub-agent transcripts into your context.** Consume sub-agent outputs as structured data. Pass only the relevant subset to the next agent. Exception: Scout's full structured findings are passed verbatim to the Architect.
+2. **Never clone full sub-agent transcripts into your context.** Consume sub-agent outputs as structured data. Keep reports terse — normally well under 150 lines. Request file paths, symbols, and line references instead of pasted file contents or diffs. Write intermediate artefacts to `plans/` and pass **paths** between agents. Pass only the relevant delta to the next agent. Exception: Scout's structured findings are passed verbatim to the Architect, but those findings are references, not file dumps.
 3. **Pass context explicitly between agents.** Provide the original task, sub-task, relevant findings, and plan constraints. Do not assume a sub-agent has seen prior steps.
 4. **Announce every invocation.** State which agent is being called and why before invoking it.
 5. **Resolve the plan-approval gate only once** (in phase 4). If the user says "just do it all," push back gently, then proceed if they accept the risk, recording that acceptance in the plan file.
@@ -128,10 +168,10 @@ Then invoke the **Security Auditor** only if the change touches auth, crypto, se
 
 | Agent | When to invoke | What it does | Model tier |
 |---|---|---|---|
-| Scout | After intake is confirmed | Discovers relevant files, patterns, test setup, risks | fast/cheap |
-| Image Reader | When visual facts about image files are needed (audit/error screenshots, exported designs) | Reads images and reports what is visible; capped at 10 per invocation | fast/cheap (vision) |
-| Architect | After Scout returns findings | Produces a small phased implementation plan | high-cost |
-| Implementer | Each phase of the plan | Code-first implementation of the assigned phase | fast/cheap |
+| Scout | Full pipeline only; after intake, in parallel for separable areas | Discovers relevant files, patterns, test setup, risks as references | fast/cheap |
+| Image Reader | When visual facts about image files are needed (audit/error screenshots, exported designs) | Reads images and reports what is visible; capped at 10 per invocation; may run alongside Scout | fast/cheap (vision) |
+| Architect | Full pipeline only; after all Scout findings return | Produces a small phased implementation plan | high-cost |
+| Implementer | Each phase of the plan; at most 2 concurrent when phases touch disjoint files | Code-first implementation of the assigned phase | fast/cheap |
 | Verifier | End-of-task gate, and targeted re-runs after fixes | Runs build/test/lint/E2E commands non-interactively, reports truncated structured results | fast/cheap |
 | Reviewer | Once, after the gate is green | Quality gate on the full task diff | mid-tier |
 | Security Auditor | Conditionally (auth/crypto/etc.) | Adversarial security review | high-cost |
