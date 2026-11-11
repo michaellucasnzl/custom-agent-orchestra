@@ -2,5 +2,7 @@
   "chat.agentFilesLocations": {
     ".github/agents": true
   },
-  "chat.mcp.discovery.enabled": true
+  "chat.mcp.discovery.enabled": true,
+  "chat.newSession.defaultMode": "conductor",
+  "chat.defaultModel": "sonnet"
 }
